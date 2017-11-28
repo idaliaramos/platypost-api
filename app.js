@@ -1,11 +1,12 @@
-const keyPublishable = process.env.PUBLISHABLE_KEY;
-const keySecret = process.env.SECRET_KEY;
-// const PORT = 8001;
-// const app = require('express')();
-
-('use strict');
+'use strict';
 const express = require('express');
 const app = express();
+const { SECRET_KEY, PUBLISHABLE_KEY } = require('./env');
+const keyPublishable = PUBLISHABLE_KEY;
+const keySecret = SECRET_KEY;
+// const PORT = 8001;
+// const app = require('express')();
+console.log(keySecret, 'key secret');
 // [START hello_world]
 // Say hello!
 app.get('/', (req, res) => {
