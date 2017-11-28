@@ -1,19 +1,21 @@
-// 'use strict';
-// const express = require('express');
-// const app = express();
-// // [START hello_world]
-// // Say hello!
-// app.get('/', (req, res) => {
-//   res.status(200).send('Hello, world!');
-// });
-// // [END hello_world]
-// if (module === require.main) {
-//   // [START server]
-//   // Start the server
-//   const server = app.listen(process.env.PORT || 8081, () => {
-//     const port = server.address().port;
-//     console.log('App listening on port ', port);
-//   });
-//   // [END server]
-// }
-// module.exports = app;
+const express = require('express');
+
+const SERVER_CONFIGS = require('./constants/server');
+
+const configureServer = require('./server');
+const configureRoutes = require('./routes');
+
+const app = express();
+const morgan = require('morgan');
+app.use(morgan('dev'));
+configureServer(app);
+configureRoutes(app);
+
+app.listen(SERVER_CONFIGS.PORT, error => {
+  if (error) throw error;
+  console.log(
+    'Server running on port: ' + SERVER_CONFIGS.PORT,
+    SERVER_CONFIGS,
+    '<<<serverconfigs'
+  );
+});

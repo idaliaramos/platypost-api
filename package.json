@@ -2,7 +2,7 @@
   "name": "mailapi",
   "version": "1.0.0",
   "description": "send snail mail withoug leaving your chair",
-  "main": "app.js",
+  "main": "index.js",
   "scripts": {
     "test": "test",
     "start": "nodemon"
@@ -17,12 +17,12 @@
   "dependencies": {
     "babel-preset-react-app": "^3.1.0",
     "body-parser": "^1.18.2",
+    "cors": "^2.8.4",
     "dotenv": "^4.0.0",
     "express": "^4.16.2",
     "express-react-views": "0.10.4",
     "lob": "^4.1.1",
     "morgan": "^1.9.0",
-    "nodemon": "^1.12.1",
     "pug": "^2.0.0-rc.4",
     "stripe": "^5.3.0"
   },
