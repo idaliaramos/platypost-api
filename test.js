@@ -7,7 +7,7 @@ Lob.letters.create(
   {
     description: 'Demo Letter',
     to: {
-      name: 'Harry Zhang',
+      name: 'test non ss3 ',
       address_line1: '185 Berry St',
       address_line2: '# 6100',
       address_city: 'San Francisco',
@@ -24,10 +24,39 @@ Lob.letters.create(
       address_zip: '94107',
       address_country: 'US'
     },
-    file: 'https://s3-us-west-2.amazonaws.com/lob-assets/letter-goblue.pdf',
+    file: 'http://www.pdf995.com/samples/pdf.pdf',
     color: true
   },
   function(err, res) {
     console.log(err, res);
   }
 );
+
+//
+// Lob.postcards.create(
+//   {
+//     description: 'Demo Postcard job',
+//     to: {
+//       name: 'Harry Zhang',
+//       address_line1: '185 Berry St',
+//       address_line2: '# 6100',
+//       address_city: 'San Francisco',
+//       address_state: 'CA',
+//       address_zip: '94107'
+//     },
+//     from: {
+//       name: 'Harry Zhang',
+//       address_line1: '185 Berry St',
+//       address_line2: '# 6100',
+//       address_city: 'San Francisco',
+//       address_state: 'CA',
+//       address_zip: '94107'
+//     },
+//     front:
+//       'https://heartlandbaptist.edu/wp-content/uploads/2016/02/2016-MCO-Postcard-Back.png',
+//     back: 'https://lob.com/postcardback.pdf'
+//   },
+//   function(err, res) {
+//     console.log(err, res);
+//   }
+// );

@@ -12,7 +12,6 @@ const corsOptions = {
 
 const configureServer = app => {
   app.use(cors());
-
   app.use(bodyParser.json());
 };
 
