@@ -11,7 +11,13 @@ const corsOptions = {
 };
 
 const configureServer = app => {
-  app.use(cors());
+  console.log('****');
+  app.use(
+    cors({
+      origin: 'http://localhost:3001',
+      credentials: true
+    })
+  );
   app.use(bodyParser.json());
 };
 

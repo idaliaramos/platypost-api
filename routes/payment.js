@@ -17,9 +17,9 @@ const paymentApi = app => {
       }
       Lob.letters.create(
         {
-          description: 'Demo Letter',
+          description: 'Ui Done',
           to: {
-            name: 'Nestor',
+            name: 'Idalia',
             address_line1: '185 Berry St',
             address_line2: '# 6100',
             address_city: 'San Francisco',
@@ -115,3 +115,5 @@ module.exports = paymentApi;
 //
 // module.exports = paymentApi;
 //OPTION3
+//lob server down
+//get notified when lob service fails
