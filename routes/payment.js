@@ -17,7 +17,7 @@ const paymentApi = app => {
       }
       Lob.letters.create(
         {
-          description: 'Ui Done',
+          description: 'Testing page  151',
           to: {
             name: 'Idalia',
             address_line1: '185 Berry St',
@@ -37,7 +37,7 @@ const paymentApi = app => {
             address_country: 'US'
           },
           file:
-            'https://s3-us-west-2.amazonaws.com/lob-assets/letter-goblue.pdf',
+            'http://localhost:8080/s3/uploads/ef2aef56-4b96-4b10-929d-504dfe769e5c_/uploads/IdaliaRamosFullStackEngineer.pdf',
           color: true
         },
         (lobError, lobSuccess) => {
