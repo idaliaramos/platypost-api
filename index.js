@@ -4,6 +4,7 @@ const AWS = require('aws-sdk');
 const SERVER_CONFIGS = require('./constants/server');
 const configureServer = require('./server');
 const configureRoutes = require('./routes');
+
 // const ENV = require('env');
 // const payment = require('../routes/payment');
 const app = express();
@@ -11,6 +12,7 @@ const morgan = require('morgan');
 app.use(morgan('dev'));
 
 configureServer(app);
+
 configureRoutes(app);
 
 app.use(
