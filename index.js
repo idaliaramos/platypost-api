@@ -15,6 +15,9 @@ configureServer(app);
 
 configureRoutes(app);
 
+process.env.AWS_ACCESS_KEY_ID = 'AKIAIIHEQYFHMCQ7HUDQ';
+process.env.AWS_SECRET_ACCESS_KEY = '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';
+
 app.use(
   '/s3',
   require('react-s3-uploader/s3router')({
