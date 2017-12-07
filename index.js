@@ -15,8 +15,8 @@ configureServer(app);
 
 configureRoutes(app);
 
-process.env.AWS_ACCESS_KEY_ID = 'AKIAIIHEQYFHMCQ7HUDQ';
-process.env.AWS_SECRET_ACCESS_KEY = '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';
+process.env.AWS_ACCESS_KEY_ID = 'AKIAIJZULTHVD5MZV6VQ';
+process.env.AWS_SECRET_ACCESS_KEY = '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';
 
 app.use(
   '/s3',
