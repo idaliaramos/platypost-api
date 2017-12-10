@@ -10,48 +10,36 @@ const paymentApi = app => {
   });
 
   app.post('/', (req, res) => {
-    stripe.charges.create(req.body, (stripeError, stripeSuccess) => {
-      if (stripeError) {
-        res.status(500).send({ stripeError });
-        return;
-      }
-      Lob.letters.create(
-        {
-          description: 'Deployed',
-          to: {
-            name: 'Idalia',
-            address_line1: '185 Berry St',
-            address_line2: '# 6100',
-            address_city: 'San Francisco',
-            address_state: 'CA',
-            address_zip: '94107',
-            address_country: 'US'
-          },
-          from: {
-            name: 'Leore Avidar',
-            address_line1: '185 Berry St',
-            address_line2: '# 6100',
-            address_city: 'San Francisco',
-            address_state: 'CA',
-            address_zip: '94107',
-            address_country: 'US'
-          },
-          file:
-            'https://s3-us-west-2.amazonaws.com/lob-assets/letter-goblue.pdf',
-          color: true
-        },
-        (lobError, lobSuccess) => {
-          if (lobError) {
-            res.status(500).send({ stripeSuccess, lobError });
-            return;
-          }
-          res.status(200).send({
-            stripeSuccess,
-            lobSuccess
-          });
+    stripe.charges.create(
+      req.body.paymentInfo,
+      (stripeError, stripeSuccess) => {
+        if (stripeError) {
+          res.status(500).send({ stripeError });
+          return;
         }
-      );
-    });
+        Lob.letters.create(
+          {
+            description: 'Deployed',
+            to: req.body.mailInfo.receiverInfo,
+            from: req.body.mailInfo.senderInfo,
+            file:
+              'https://s3-us-west-2.amazonaws.com/lob-assets/letter-goblue.pdf',
+            color: true
+          },
+          (lobError, lobSuccess) => {
+            if (lobError) {
+              res.status(500).send({ stripeSuccess, lobError });
+              return;
+            }
+            res.status(200).send({
+              stripeSuccess,
+              lobSuccess
+            });
+          }
+          //TODO: function that uploads stripe success and lobSuccess
+        );
+      }
+    );
   });
   // .then(response => console.log(response));
 

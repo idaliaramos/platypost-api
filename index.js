@@ -1,6 +1,8 @@
 const express = require('express');
 const multer = require('multer');
 const AWS = require('aws-sdk');
+const usersRouter = require('./lib/instances/usersRouter');
+const authenticationRouter = require('./lib/instances/authenticationRouter');
 const SERVER_CONFIGS = require('./constants/server');
 const configureServer = require('./server');
 const configureRoutes = require('./routes');
@@ -10,14 +12,13 @@ const configureRoutes = require('./routes');
 const app = express();
 const morgan = require('morgan');
 app.use(morgan('dev'));
-
 configureServer(app);
-
 configureRoutes(app);
 
 // process.env.AWS_ACCESS_KEY_ID = 'AKIAIJZULTHVD5MZV6VQ';
 // process.env.AWS_SECRET_ACCESS_KEY = '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';
-
+app.use(authenticationRouter);
+app.use(usersRouter);
 app.use(
   '/s3',
   require('react-s3-uploader/s3router')({
