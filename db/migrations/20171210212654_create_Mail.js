@@ -8,7 +8,13 @@ exports.up = function(knex, Promise) {
       .onDelete('CASCADE')
       .index();
     table.jsonb('mailData').notNullable();
-    table.text('receiverName').defaultTo('');
+    table.text('lobId').defaultTo('');
+    table
+      .integer('addressId')
+      .notNullable()
+      .references('Address.id')
+      .onDelete('CASCADE')
+      .index();
     table.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
   });
 };
