@@ -12,7 +12,10 @@ const paymentApi = app => {
     });
   });
 
+  app.get('/s3/*');
+
   app.post('/', (req, res) => {
+    console.log(req.body.mailInfo.S3UploadPublicPath, 'this is the url');
     stripe.charges.create(
       req.body.paymentInfo,
       (stripeError, stripeSuccess) => {
@@ -25,55 +28,59 @@ const paymentApi = app => {
             description: 'Deployed',
             to: req.body.mailInfo.receiverInfo,
             from: req.body.mailInfo.senderInfo,
-            file:
-              'https://s3-us-west-2.amazonaws.com/lob-assets/letter-goblue.pdf',
+            file: `https://mailapp-backend-187406.appspot.com${req.body.mailInfo
+              .S3UploadPublicPath}`,
             color: true
           },
           (lobError, lobSuccess) => {
             if (lobError) {
+              console.log(lobError, 'this is the lob error');
               res.status(500).send({ stripeSuccess, lobError });
               return;
             }
             //send address to address table
             //TO:DO get user id from request from loggein in user
             //use decoded jwt
+            console.log(req.body, 'body');
 
             const service = new AddressService();
             const newAddress = service
               .createForUser(1, req.body.mailInfo.receiverInfo)
               .then(address => address);
-            // whatever createForUser gives you,
-            // you have access to it in here:
-            // console.log(newAddress)
-            //   // subsequent logic should be placed here.
-            // });
             console.log(newAddress, 'this is the object');
-            // const newAddress = service
-            //   .createForUser(1, req.body.mailInfo.receiverInfo)
-            //   .then(newAddress => Promise.resolve(newAddress));
-            // console.log(newAddress, 'newAddress');
-
-            // console.log(lobSuccess.to.address_line1);
             //get address id
             //send id and data to mail table
-
             const mailService = new MailService();
-            const mailData = mailService
-              .createForUser(1, {
-                mailData: lobSuccess,
-                addressId: 1,
-                lobId: lobSuccess.id
+            //create Address for user
+            //refactor so that i can lob first charge 2sd ...
+            // stripe.chargeUser(token).then(() => {
+            //   return;
+            //   //return all the stuff in the bottom
+            // });
+            service
+              .createForUser(1, req.body.mailInfo.receiverInfo)
+              .then(address => {
+                return mailService
+                  .createForUser(1, {
+                    mailData: lobSuccess,
+                    addressId: address.id,
+                    lobId: lobSuccess.id
+                  })
+                  .then(mail => {
+                    console.log(mail, 'mail');
+                  })
+                  .then(() => {
+                    res.status(200).send({
+                      stripeSuccess,
+                      lobSuccess
+                    });
+                  });
               })
-              .then(mail => {
-                console.log(mail, 'mail');
+              .catch(err => {
+                console.log('err', err);
+                res.status(500);
               });
-            console.log(mailData);
-            res.status(200).send({
-              stripeSuccess,
-              lobSuccess
-            });
           }
-          //TODO: function that uploads stripe success and lobSuccess
         );
       }
     );

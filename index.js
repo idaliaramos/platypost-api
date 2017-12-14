@@ -4,15 +4,31 @@ const AWS = require('aws-sdk');
 const usersRouter = require('./lib/instances/usersRouter');
 const authenticationRouter = require('./lib/instances/authenticationRouter');
 const SERVER_CONFIGS = require('./constants/server');
-const configureServer = require('./server');
 const configureRoutes = require('./routes');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+
+const CORS_WHITELIST = require('./constants/frontend');
+
+const corsOptions = {
+  origin: (origin, callback) =>
+    CORS_WHITELIST.indexOf(origin) !== -1
+      ? callback(null, true)
+      : callback(new Error('Not allowed by CORS'))
+};
 
 // const ENV = require('env');
 // const payment = require('../routes/payment');
 const app = express();
 const morgan = require('morgan');
 app.use(morgan('dev'));
-configureServer(app);
+app.use(
+  cors({
+    origin: 'http://localhost:3000',
+    credentials: true
+  })
+);
+app.use(bodyParser.json());
 configureRoutes(app);
 
 // process.env.AWS_ACCESS_KEY_ID = 'AKIAIJZULTHVD5MZV6VQ';
