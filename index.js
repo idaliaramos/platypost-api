@@ -1,13 +1,16 @@
 const express = require('express');
 const multer = require('multer');
 const AWS = require('aws-sdk');
+const { JWT_KEY } = require('./env');
 const usersRouter = require('./lib/instances/usersRouter');
+// const historyRouter = require('./lib/instances/historyRouter');
+const mailRouter = require('./lib/instances/mailRouter');
 const authenticationRouter = require('./lib/instances/authenticationRouter');
 const SERVER_CONFIGS = require('./constants/server');
 const configureRoutes = require('./routes');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-
+const jwt = require('express-jwt');
 const CORS_WHITELIST = require('./constants/frontend');
 
 const corsOptions = {
@@ -30,10 +33,29 @@ app.use(
 );
 app.use(bodyParser.json());
 configureRoutes(app);
+app.use(
+  jwt({
+    secret: JWT_KEY,
+    requestProperty: 'jwt.payload',
+    credentialsRequired: false,
+    audience: 'bucketMapper',
+    issuer: 'bucketMapper'
+  })
+);
+app.use((request, response, next) => {
+  const authenticatedUserId = request.jwt ? request.jwt.payload.sub : undefined;
+  request.authenticatedUserId =
+    Number.isFinite(authenticatedUserId) && authenticatedUserId > 0
+      ? authenticatedUserId
+      : null;
+  next();
+});
 
 // process.env.AWS_ACCESS_KEY_ID = 'AKIAIJZULTHVD5MZV6VQ';
 // process.env.AWS_SECRET_ACCESS_KEY = '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';
 app.use(authenticationRouter);
+// app.use(historyRouter);
+app.use(mailRouter);
 app.use(usersRouter);
 app.use(
   '/s3',

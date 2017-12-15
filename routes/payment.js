@@ -3,6 +3,8 @@
 const AddressService = require('../lib/services/AddressService');
 const MailService = require('../lib/services/MailService');
 const stripe = require('../constants/stripe');
+const userRepository = require('../lib/instances/userRepository');
+const mailRepository = require('../lib/instances/mailRepository');
 var Lob = require('lob')('test_066ca30f3d0fe263d7b6a8af760a4983778');
 const paymentApi = app => {
   app.get('/', (req, res) => {
@@ -15,7 +17,7 @@ const paymentApi = app => {
   app.get('/s3/*');
 
   app.post('/', (req, res) => {
-    console.log(req.body.mailInfo.S3UploadPublicPath, 'this is the url');
+    console.log(req.body, 'req body');
     stripe.charges.create(
       req.body.paymentInfo,
       (stripeError, stripeSuccess) => {
@@ -39,29 +41,36 @@ const paymentApi = app => {
               return;
             }
             //send address to address table
-            //TO:DO get user id from request from loggein in user
-            //use decoded jwt
-            console.log(req.body, 'body');
 
             const service = new AddressService();
             const newAddress = service
-              .createForUser(1, req.body.mailInfo.receiverInfo)
+              .createForUser(
+                req.body.mailInfo.userId,
+                req.body.mailInfo.receiverInfo
+              )
               .then(address => address);
-            console.log(newAddress, 'this is the object');
+            console.log('do i get here 1 :)');
             //get address id
             //send id and data to mail table
-            const mailService = new MailService();
-            //create Address for user
-            //refactor so that i can lob first charge 2sd ...
+            //TODO:; i think this is the problem
+            const mailService = new MailService({
+              mailRepository,
+              userRepository
+            });
+            console.log('do I get here 2 :(nope)');
             // stripe.chargeUser(token).then(() => {
             //   return;
             //   //return all the stuff in the bottom
             // });
             service
-              .createForUser(1, req.body.mailInfo.receiverInfo)
+              .createForUser(
+                req.body.mailInfo.userId,
+                req.body.mailInfo.receiverInfo
+              )
               .then(address => {
+                console.log(address, 'i am 2');
                 return mailService
-                  .createForUser(1, {
+                  .createForUser(req.body.mailInfo.userId, {
                     mailData: lobSuccess,
                     addressId: address.id,
                     lobId: lobSuccess.id
@@ -86,7 +95,23 @@ const paymentApi = app => {
     );
   });
   // .then(response => console.log(response));
-
+  //   function anAsyncProcess() {
+  //     return service.createForUser(1, req.body.mailInfo.receiverInfo)
+  //     }
+  // anAsyncProcess().then(newAddress => {
+  // return mailService.createForUser(req.body.mailInfo.userId, {
+  // mailData: lobSuccess,
+  // addressId: address.id,
+  // lobId: lobSuccess.id
+  //   }).then(mail => {
+  //     console.log(mail, 'mail');
+  //   })
+  //   .then(() => {
+  //     res.status(200).send({
+  //       stripeSuccess,
+  //       lobSuccess
+  //     })
+  //   })
   return app;
 };
 
