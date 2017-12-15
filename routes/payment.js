@@ -57,7 +57,7 @@ const paymentApi = app => {
               mailRepository,
               userRepository
             });
-            console.log('do I get here 2 :(nope)');
+            console.log(req.body.mailInfo, req.body.mailInfo.receiverInfo);
             // stripe.chargeUser(token).then(() => {
             //   return;
             //   //return all the stuff in the bottom
