@@ -118,11 +118,6 @@ const paymentApi = app => {
   app.get('/s3/*');
 
   app.post('/', (req, res) => {
-    console.log(
-      req.body.mailInfo.receiverInfo,
-      'req body.mailInfo.receiverInfo'
-    );
-
     stripe.charges.create(
       req.body.paymentInfo,
       (stripeError, stripeSuccess) => {
@@ -134,17 +129,14 @@ const paymentApi = app => {
         Lob.postcards.create(
           {
             description: 'Deployed',
-            // to: {req.body.mailInfo.receiverInfo.address_line1 + req.body.mailInfo.receiverInfo.name + req.body.mailInfo.receiverInfo.address_city + req.body.mailInfo.receiverInfo.address_state + req.body.mailInfo.receiverInfo.address_zip},
-            to: req.body.mailInfo.senderInfo,
+            to: req.body.mailInfo.receiverInfo,
             from: req.body.mailInfo.senderInfo,
             front: `https://mailapp-backend-187406.appspot.com${req.body
               .mailInfo.S3UploadPublicPath}`,
             back: 'tmpl_ebddb82469e58ce',
             merge_variables: {
-              name: 'mia',
-              message:
-                'Hi there! Enjoying our time in the hot springs! Come with us next time!'
-              // message: req.body.mailInfo.receiverInfo.message
+              // name: 'mia',
+              message: req.body.mailInfo.messageInfo.message
             }
           },
           (lobError, lobSuccess) => {
