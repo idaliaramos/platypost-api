@@ -27,7 +27,7 @@ const morgan = require('morgan');
 app.use(morgan('dev'));
 app.use(
   cors({
-    origin: 'http://localhost:3000',
+    origin: 'http://platypost.s3-website-us-west-1.amazonaws.com',
     credentials: true
   })
 );
@@ -38,8 +38,10 @@ app.use(
     secret: JWT_KEY,
     requestProperty: 'jwt.payload',
     credentialsRequired: false,
-    audience: 'bucketMapper',
-    issuer: 'bucketMapper'
+    // audience: 'bucketMapper',
+    // issuer: 'bucketMapper'
+    audience: 'platypost',
+    issuer: 'platypost'
   })
 );
 app.use((request, response, next) => {
@@ -71,5 +73,5 @@ app.use(
 
 app.listen(SERVER_CONFIGS.PORT, error => {
   if (error) throw error;
-  console.log('Server running on port: ' + SERVER_CONFIGS.PORT);
+  console.log('Server running on port: >>>>>>>>>>>>' + SERVER_CONFIGS.PORT);
 });
