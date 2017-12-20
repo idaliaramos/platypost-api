@@ -59,7 +59,7 @@ app.use(
     bucket: 'mails110017',
     region: 'us-west-1', //optional
     signatureVersion: 'v4', //optional (use for some amazon regions: frankfurt and others)
-    headers: { 'Access-Control-Allow-Origin': '*' }, // optional
+    // headers: { 'Access-Control-Allow-Origin': '*' }, // optional
     ACL: 'private', // this is default
     uniquePrefix: true // (4.0.2 and above) default is true, setting the attribute to false preserves the original filename in S3
   })
