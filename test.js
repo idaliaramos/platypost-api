@@ -53,8 +53,10 @@ Lob.postcards.create(
       address_state: 'CA',
       address_zip: '94107'
     },
+    //check
     front:
-      'https://mailapp-backend-187406.appspot.com/s3/uploads/dd64c052-97f1-441c-93ce-57ba547ead81_/uploads/IdaliaRamosFullStackEngineer.pdf',
+      'http://platypost110017-env.us-west-1.elasticbeanstalk.com/s3/uploads/dd64c052-97f1-441c-93ce-57ba547ead81_/uploads/IdaliaRamosFullStackEngineer.pdf',
+    // 'https://mailapp-backend-187406.appspot.com/s3/uploads/dd64c052-97f1-441c-93ce-57ba547ead81_/uploads/IdaliaRamosFullStackEngineer.pdf',
     back: 'https://lob.com/postcardback.pdf'
   },
   function(err, res) {

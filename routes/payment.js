@@ -131,8 +131,11 @@ const paymentApi = app => {
             description: 'Deployed',
             to: req.body.mailInfo.receiverInfo,
             from: req.body.mailInfo.senderInfo,
-            front: `https://mailapp-backend-187406.appspot.com${req.body
-              .mailInfo.S3UploadPublicPath}`,
+            front: `http://platypost110017-env.us-west-1.elasticbeanstalk.com${req
+              .body.mailInfo.S3UploadPublicPath}`,
+            // front: `https://mailapp-backend-187406.appspot.com${req.body
+            //   .mailInfo.S3UploadPublicPath}`,
+
             back: 'tmpl_ebddb82469e58ce',
             merge_variables: {
               // name: 'mia',
