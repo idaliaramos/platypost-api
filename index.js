@@ -38,8 +38,6 @@ app.use(
     secret: JWT_KEY,
     requestProperty: 'jwt.payload',
     credentialsRequired: false,
-    // audience: 'bucketMapper',
-    // issuer: 'bucketMapper'
     audience: 'platypost',
     issuer: 'platypost'
   })
@@ -52,11 +50,7 @@ app.use((request, response, next) => {
       : null;
   next();
 });
-
-// process.env.AWS_ACCESS_KEY_ID = 'AKIAIJZULTHVD5MZV6VQ';
-// process.env.AWS_SECRET_ACCESS_KEY = '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';
 app.use(authenticationRouter);
-// app.use(historyRouter);
 app.use(mailRouter);
 app.use(usersRouter);
 app.use(
@@ -65,7 +59,7 @@ app.use(
     bucket: 'mails110017',
     region: 'us-west-1', //optional
     signatureVersion: 'v4', //optional (use for some amazon regions: frankfurt and others)
-    // headers: { 'Access-Control-Allow-Origin': '*' }, // optional
+    headers: { 'Access-Control-Allow-Origin': '*' }, // optional
     ACL: 'private', // this is default
     uniquePrefix: true // (4.0.2 and above) default is true, setting the attribute to false preserves the original filename in S3
   })
