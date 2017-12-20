@@ -27,7 +27,8 @@ const morgan = require('morgan');
 app.use(morgan('dev'));
 app.use(
   cors({
-    origin: 'http://platypost.s3-website-us-west-1.amazonaws.com',
+    // origin: 'http://platypost.s3-website-us-west-1.amazonaws.com',
+    origin: 'http://localhost:3000',
     credentials: true
   })
 );
@@ -62,8 +63,7 @@ app.use(
     signatureVersion: 'v4', //optional (use for some amazon regions: frankfurt and others)
     headers: {
       TEMPXYZ: 'Did this go through',
-      'Access-Control-Allow-Origin':
-        'http://platypost.s3-website-us-west-1.amazonaws.com'
+      'Access-Control-Allow-Origin': 'http://locahost:3000'
     }, // optional
     ACL: 'private', // this is default
     uniquePrefix: true // (4.0.2 and above) default is true, setting the attribute to false preserves the original filename in S3
@@ -72,8 +72,5 @@ app.use(
 
 app.listen(SERVER_CONFIGS.PORT, error => {
   if (error) throw error;
-  console.log(
-    'Server running on port: >>>>>>>>>>>>' + SERVER_CONFIGS.PORT,
-    AWS
-  );
+  console.log('Server running on port: >>>>>>>>>>>>' + SERVER_CONFIGS.PORT);
 });
