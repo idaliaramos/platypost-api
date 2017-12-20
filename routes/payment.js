@@ -128,7 +128,7 @@ const paymentApi = app => {
         //req.body.mailInfo.receiverInfo should not have the message
         Lob.postcards.create(
           {
-            description: 'Deployed',
+            description: 'Hello',
             to: req.body.mailInfo.receiverInfo,
             from: req.body.mailInfo.senderInfo,
             front: `http://platypost110017-env.us-west-1.elasticbeanstalk.com${req

@@ -57,6 +57,7 @@ app.use(
   '/s3',
   require('react-s3-uploader/s3router')({
     bucket: 'mails110017',
+    // bucket: 'platypost',
     region: 'us-west-1', //optional
     signatureVersion: 'v4', //optional (use for some amazon regions: frankfurt and others)
     // headers: { 'Access-Control-Allow-Origin': '*' }, // optional
@@ -67,5 +68,8 @@ app.use(
 
 app.listen(SERVER_CONFIGS.PORT, error => {
   if (error) throw error;
-  console.log('Server running on port: >>>>>>>>>>>>' + SERVER_CONFIGS.PORT);
+  console.log(
+    'Server running on port: >>>>>>>>>>>>' + SERVER_CONFIGS.PORT,
+    AWS
+  );
 });
