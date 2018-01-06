@@ -1,0 +1,14 @@
+diff --git a/.env.development b/.env.development
+index 38626f3..1df3dce 100644
+--- a/.env.development
++++ b/.env.development
+@@ -4,6 +4,6 @@ PGUSER=platypost_admin
+ PGPASSWORD=master
+ SECRET_KEY=sk_test_qEAbjzReKudJjfEw3oE9EMxj
+ PUBLISHABLE_KEY=pk_test_maSJzpsEAisC3LrcQtV6Tvqn
+-AWS_ACCESS_KEY_ID =AKIAIJZULTHVD5MZV6VQ;
+-AWS_SECRET_ACCESS_KEY =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;
+-JWT_KEY=iXCw3WlKR/wAZplJOpK73MjWhJ7SYOXsYOzdAnBt542Mh0E+LodYLCWczr9+ehKoUsP8Yqr10LbZ2TADnyFedg==;
++AWS_ACCESS_KEY_ID=AKIAIJZULTHVD5MZV6VQ
++AWS_SECRET_ACCESS_KEY=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
++JWT_KEY=iXCw3WlKR/wAZplJOpK73MjWhJ7SYOXsYOzdAnBt542Mh0E+LodYLCWczr9+ehKoUsP8Yqr10LbZ2TADnyFedg==

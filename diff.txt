@@ -1,0 +1,716 @@
+diff --git a/.env.development b/.env.development
+index 38626f3..8b872b3 100644
+--- a/.env.development
++++ b/.env.development
+@@ -4,6 +4,6 @@ PGUSER=platypost_admin
+ PGPASSWORD=master
+ SECRET_KEY=sk_test_qEAbjzReKudJjfEw3oE9EMxj
+ PUBLISHABLE_KEY=pk_test_maSJzpsEAisC3LrcQtV6Tvqn
+-AWS_ACCESS_KEY_ID =AKIAIJZULTHVD5MZV6VQ;
+-AWS_SECRET_ACCESS_KEY =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;
+-JWT_KEY=iXCw3WlKR/wAZplJOpK73MjWhJ7SYOXsYOzdAnBt542Mh0E+LodYLCWczr9+ehKoUsP8Yqr10LbZ2TADnyFedg==;
++AWS_ACCESS_KEY_ID=AKIAIJZULTHVD5MZV6VQ;
++AWS_SECRET_ACCESS_KEY=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;
++JWT_KEY=I28UQNRG27Ya4OhC5sKW+U6qpgrUemVbbCXvV38Ri4OJQiwVohH22DKPUAINsZeGtoAu+HUoqFGW7iHz6fRaKQ
+diff --git a/.env.eb b/.env.eb
+new file mode 100644
+index 0000000..d7c10d6
+--- /dev/null
++++ b/.env.eb
+@@ -0,0 +1,10 @@
++PGHOST=aa1vn0iomfz8d9v.cqgth4waleuu.us-west-1.rds.amazonaws.com
++PGDATABASE=platypost_prod
++PGUSER=RamoJancsy
++PGPASSWORD=Dreamcatcher22
++SECRET_KEY=sk_test_qEAbjzReKudJjfEw3oE9EMxj
++PUBLISHABLE_KEY=pk_test_maSJzpsEAisC3LrcQtV6Tvqn
++AWS_ACCESS_ID=AKIAIJZULTHVD5MZV6VQ
++AWS_SECRET_KEY=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
++JWT_KEY=I28UQNRG27Ya4OhC5sKW+U6qpgrUemVbbCXvV38Ri4OJQiwVohH22DKPUAINsZeGtoAu+HUoqFGW7iHz6fRaKQ
++AWS_ACCESS_KEY_ID=AKIAIJZULTHVD5MZV6VQ;
+diff --git a/.gitignore b/.gitignore
+index 21f9518..312d99b 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -4,6 +4,8 @@ logs
+ npm-debug.log*
+ yarn-debug.log*
+ yarn-error.log*
++.env.db
++.env
+ 
+ # Runtime data
+ pids
+@@ -58,3 +60,8 @@ typings/
+ .env
+ 
+ .env.test
++
++# Elastic Beanstalk Files
++.elasticbeanstalk/*
++!.elasticbeanstalk/*.cfg.yml
++!.elasticbeanstalk/*.global.yml
+diff --git a/constants/frontend.js b/constants/frontend.js
+index 6cf90a8..28e9155 100644
+--- a/constants/frontend.js
++++ b/constants/frontend.js
+@@ -1,8 +1,7 @@
+ const FRONTEND_DEV_URLS = ['http://localhost:3000'];
+ 
+ const FRONTEND_PROD_URLS = [
+-  'https://www.yourdomain.com',
+-  'https://yourdomain.com'
++  'http://platypost.s3-website-us-west-1.amazonaws.com'
+ ];
+ 
+ module.exports =
+diff --git a/constants/server.js b/constants/server.js
+index 6d01e1b..6d6c71b 100644
+--- a/constants/server.js
++++ b/constants/server.js
+@@ -1,6 +1,6 @@
+ const path = require('path');
+ 
+-const SERVER_PORT = 8080;
++const SERVER_PORT = 3000;
+ 
+ const SERVER_CONFIGS = {
+   PRODUCTION: process.env.NODE_ENV === 'production',
+diff --git a/index.js b/index.js
+index 6aae01f..f9c2fd1 100644
+--- a/index.js
++++ b/index.js
+@@ -27,6 +27,7 @@ const morgan = require('morgan');
+ app.use(morgan('dev'));
+ app.use(
+   cors({
++    // origin: 'http://platypost.s3-website-us-west-1.amazonaws.com',
+     origin: 'http://localhost:3000',
+     credentials: true
+   })
+@@ -38,8 +39,8 @@ app.use(
+     secret: JWT_KEY,
+     requestProperty: 'jwt.payload',
+     credentialsRequired: false,
+-    audience: 'bucketMapper',
+-    issuer: 'bucketMapper'
++    audience: 'platypost',
++    issuer: 'platypost'
+   })
+ );
+ app.use((request, response, next) => {
+@@ -50,20 +51,20 @@ app.use((request, response, next) => {
+       : null;
+   next();
+ });
+-
+-// process.env.AWS_ACCESS_KEY_ID = 'AKIAIJZULTHVD5MZV6VQ';
+-// process.env.AWS_SECRET_ACCESS_KEY = '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';
+ app.use(authenticationRouter);
+-// app.use(historyRouter);
+ app.use(mailRouter);
+ app.use(usersRouter);
+ app.use(
+   '/s3',
+   require('react-s3-uploader/s3router')({
+     bucket: 'mails110017',
++    // bucket: 'platypost',
+     region: 'us-west-1', //optional
+     signatureVersion: 'v4', //optional (use for some amazon regions: frankfurt and others)
+-    // headers: { 'Access-Control-Allow-Origin': '*' }, // optional
++    headers: {
++      TEMPXYZ: 'Did this go through',
++      'Access-Control-Allow-Origin': 'http://locahost:3000'
++    }, // optional
+     ACL: 'private', // this is default
+     uniquePrefix: true // (4.0.2 and above) default is true, setting the attribute to false preserves the original filename in S3
+   })
+@@ -71,5 +72,5 @@ app.use(
+ 
+ app.listen(SERVER_CONFIGS.PORT, error => {
+   if (error) throw error;
+-  console.log('Server running on port: ' + SERVER_CONFIGS.PORT);
++  console.log('Server running on port: >>>>>>>>>>>>' + SERVER_CONFIGS.PORT);
+ });
+diff --git a/lib/services/AuthenticationService.js b/lib/services/AuthenticationService.js
+index 9405f6b..b8ce325 100644
+--- a/lib/services/AuthenticationService.js
++++ b/lib/services/AuthenticationService.js
+@@ -41,8 +41,8 @@ class AuthenticationService {
+ 
+       return signJwt(
+         {
+-          iss: 'bucketMapper',
+-          aud: 'bucketMapper',
++          iss: 'platypost',
++          aud: 'platypost',
+           iat: timeIssued,
+           exp: timeExpires,
+           sub: user.id
+diff --git a/lib/tests/supertest.test.js b/lib/tests/supertest.test.js
+new file mode 100644
+index 0000000..34446c0
+--- /dev/null
++++ b/lib/tests/supertest.test.js
+@@ -0,0 +1,167 @@
++'use strict';
++
++process.env.NODE_ENV = 'test';
++
++const { suite, test } = require('mocha');
++const request = require('supertest');
++const server = require('../../index');
++const { addDatabaseHooks } = require('./utils');
++let token;
++suite(
++  'mail route',
++  addDatabaseHooks(() => {
++    suite('with token', () => {
++      const agent = request.agent(server);
++
++      beforeEach(done => {
++        request(server)
++          .post('/authenticate')
++          .set('Accept', 'application/json')
++          .set('Content-Type', 'application/json')
++          .send({
++            email: 'idalia@gmail.com',
++            password: 'idalia123'
++          })
++          .end((err, res) => {
++            if (err) {
++              return done(err);
++            }
++            var result = res.body;
++
++            token = result.token;
++            // console.log(token, 'this is the test token');
++            return done();
++          });
++      });
++
++      test('GET /users/1/mail', done => {
++        agent
++          .get('/users/1/mail')
++          .set('Accept', 'application/json')
++          .set('Authorization', 'Bearer ' + token)
++          .expect('Content-Type', /json/)
++          .expect(
++            200,
++            [
++              {
++                id: 1,
++                name: 'Iceland',
++                address_line1: '229 haight st 176',
++                address_line2: '',
++                address_city: 'San Francisco',
++                address_state: 'CA',
++                address_zip: '94102'
++              }
++            ],
++            done
++          );
++      });
++
++      test('GET /mails/1', done => {
++        agent
++          .get('/mails/1')
++          .set('Accept', 'application/json')
++          .set('Authorization', 'Bearer ' + token)
++          // .expect('Accept', 'application/json')
++          .expect(200, done);
++      });
++
++      test('POST /mail', done => {
++        agent
++          .post('/users/1/mail')
++          .set('Accept', 'application/json')
++          .set('Authorization', 'Bearer ' + token)
++          .send({
++            name: 'Idalia',
++            address_line1: '229 haight st 176',
++            address_line2: '',
++            address_city: 'San Francisco',
++            address_state: 'CA',
++            address_zip: '94102',
++            message: 'hello'
++          })
++          .expect('Content-Type', 'application/json; charset=utf-8')
++          .expect(res => {
++            delete res.body.createdAt;
++            delete res.body.updatedAt;
++          })
++          .expect(
++            200,
++            {
++              id: 1,
++              name: 'Idalia',
++              address_line1: '229 haight st 176',
++              address_line2: '',
++              address_city: 'San Francisco',
++              address_state: 'CA',
++              address_zip: '94102',
++              message: 'hello'
++            },
++            done
++          );
++      });
++
++      test('POST /mails with non-integer mailId', done => {
++        agent
++          .post('/mails')
++          .set('Accept', 'application/json')
++          .set('Authorization', 'Bearer ' + token)
++          .send({ mailId: 'two' })
++          .expect('Content-Type', /plain/)
++          .expect(404, 'Not Found', done);
++      });
++
++      test('POST /mails with unknown mailId', done => {
++        agent
++          .post('/mails')
++          .set('Accept', 'text/plain; charset=utf-8')
++          .set('Authorization', 'Bearer ' + token)
++          .send({ mailId: 2000 })
++          .expect('Content-Type', 'text/plain; charset=utf-8')
++          .expect(404, 'Not Found', done);
++      });
++    });
++    // WITHOUT TOKEN///////////////////////////////////////////////
++    suite('without token', () => {
++      test('GET /mails', done => {
++        request(server)
++          .get('/users/1/mails')
++          .set('Accept', 'application/json')
++          .expect('Content-Type', /plain/)
++          .expect(401, 'Unauthorized', done);
++      });
++
++      test('POST /mails', done => {
++        request(server)
++          .post('/users/1/mails')
++          .set('Accept', 'application/json')
++          .set('Content-Type', 'application/json')
++          .send({
++            name: 'Idalia',
++            address_line1: '229 haight st 176',
++            address_line2: '',
++            address_city: 'San Francisco',
++            address_state: 'CA',
++            address_zip: '94102',
++            message: 'hello'
++          })
++          .expect('Content-Type', 'text/plain; charset=utf-8')
++          .expect(401, 'Unauthorized', done);
++      });
++    });
++  })
++);
++test('POST /mails with non-integer mailId', done => {
++  request(server)
++    .post('/mails')
++    .set('Accept', 'application/json')
++    .send({ mailId: 'two' })
++    .expect('Content-Type', /plain/)
++    .expect(404, 'Not Found', done);
++});
++describe('App', () => {
++  it('should be able to run tests', () => {
++    expect(1 + 2).toEqual(3);
++  });
++});
++//connection of test db, user does not exist, seed must not be working..
+diff --git a/lib/tests/testUserCreate.test.js b/lib/tests/testUserCreate.test.js
+index d341db4..eb0248e 100644
+--- a/lib/tests/testUserCreate.test.js
++++ b/lib/tests/testUserCreate.test.js
+@@ -1,39 +1,39 @@
+-process.env.NODE_ENV = 'test';
+-
+-const HttpMock = require('node-mocks-http');
+-// const jest = require('jest');
+-// const Boom = require('boom');
+-const UserController = require('../instances/userController');
+-
+-describe('EntityController', () => {
+-  // const entityService = {
+-  //   create: jest.fn()
+-  // };
+-  const userController = new UserController();
+-
+-  describe('create', () => {
+-    it('should respond a created Entity', async () => {
+-      const user = {
+-        name: 'entityname',
+-        email: 'email@email.com',
+-        password: 'a description'
+-      };
+-
+-      const expectedEntity = Object.assign({}, user, { id: 1 });
+-
+-      const request = HttpMock.createRequest({ body: user });
+-      const response = HttpMock.createResponse();
+-
+-      //entityService.create.mockReturnValueOnce(Promise.resolve(expectedEntity));
+-
+-      await userController.create(request, response, () => {});
+-
+-      const actualEntity = JSON.parse(response._getData());
+-
+-      expect(actualEntity).toEqual(expectedEntity);
+-      expect(response._isJSON()).toBe(true);
+-      expect(response._getStatusCode()).toBe(200);
+-      expect(response._getHeaders().Location).toBe(`/users/1`);
+-    });
+-  });
+-});
++// process.env.NODE_ENV = 'test';
++//
++// const HttpMock = require('node-mocks-http');
++// // const jest = require('jest');
++// // const Boom = require('boom');
++// const UserController = require('../instances/userController');
++//
++// describe('EntityController', () => {
++//   // const entityService = {
++//   //   create: jest.fn()
++//   // };
++//   const userController = new UserController();
++//
++//   describe('create', () => {
++//     it('should respond a created Entity', async () => {
++//       const user = {
++//         name: 'entityname',
++//         email: 'email@email.com',
++//         password: 'a description'
++//       };
++//
++//       const expectedEntity = Object.assign({}, user, { id: 1 });
++//
++//       const request = HttpMock.createRequest({ body: user });
++//       const response = HttpMock.createResponse();
++//
++//       //entityService.create.mockReturnValueOnce(Promise.resolve(expectedEntity));
++//
++//       await userController.create(request, response, () => {});
++//
++//       const actualEntity = JSON.parse(response._getData());
++//
++//       expect(actualEntity).toEqual(expectedEntity);
++//       expect(response._isJSON()).toBe(true);
++//       expect(response._getStatusCode()).toBe(200);
++//       expect(response._getHeaders().Location).toBe(`/users/1`);
++//     });
++//   });
++// });
+diff --git a/lib/tests/unitTesting.test.js b/lib/tests/unitTesting.test.js
+deleted file mode 100644
+index e69de29..0000000
+diff --git a/lib/tests/utils.js b/lib/tests/utils.js
+new file mode 100644
+index 0000000..2313311
+--- /dev/null
++++ b/lib/tests/utils.js
+@@ -0,0 +1,40 @@
++'use strict';
++const knex = require('../instances/defaultDatabase');
++
++// add knex database hooks to a test suite to tear down and build back
++// up the database on each test in test suite.
++const addDatabaseHooks = func => {
++  return function(...args) {
++    beforeEach(done => {
++      knex.migrate
++        .rollback()
++        .then(() => {
++          return knex.migrate.latest();
++        })
++        .then(() => {
++          return knex.seed.run();
++        })
++        .finally(() => {
++          done();
++        });
++    });
++
++    after(done => {
++      knex.migrate.rollback().finally(() => {
++        knex.destroy(() => {
++          done();
++          setTimeout(() => {
++            process.exit(0);
++          }, 500);
++        });
++      });
++    });
++
++    func(...args);
++  };
++};
++
++module.exports = {
++  addDatabaseHooks
++};
++//test db is not gettin populated
+diff --git a/package-lock.json b/package-lock.json
+index 7f5446c..03ca098 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -394,6 +394,11 @@
+         }
+       }
+     },
++    "browser-stdout": {
++      "version": "1.3.0",
++      "resolved": "https://registry.npmjs.org/browser-stdout/-/browser-stdout-1.3.0.tgz",
++      "integrity": "sha1-81HTKWnTL6XXpVZxVCY9korjvR8="
++    },
+     "bser": {
+       "version": "2.0.0",
+       "resolved": "https://registry.npmjs.org/bser/-/bser-2.0.0.tgz",
+@@ -554,6 +559,11 @@
+       "resolved": "https://registry.npmjs.org/commander/-/commander-2.12.2.tgz",
+       "integrity": "sha512-BFnaq5ZOGcDN7FlrtBT4xxkgIToalIIxwjxLWVJ8bGTpe1LroqMiqQXdA7ygc7CRvaYS+9zfPGFnJqFSayx+AA=="
+     },
++    "component-emitter": {
++      "version": "1.2.1",
++      "resolved": "https://registry.npmjs.org/component-emitter/-/component-emitter-1.2.1.tgz",
++      "integrity": "sha1-E3kY1teCg/ffemt8WmPhQOaUJeY="
++    },
+     "concat-map": {
+       "version": "0.0.1",
+       "resolved": "https://registry.npmjs.org/concat-map/-/concat-map-0.0.1.tgz",
+@@ -600,6 +610,11 @@
+       "resolved": "https://registry.npmjs.org/cookie-signature/-/cookie-signature-1.0.6.tgz",
+       "integrity": "sha1-4wOogrNCzD7oylE6eZmXNNqzriw="
+     },
++    "cookiejar": {
++      "version": "2.1.1",
++      "resolved": "https://registry.npmjs.org/cookiejar/-/cookiejar-2.1.1.tgz",
++      "integrity": "sha1-Qa1XsbVVlR7BcUEqgZQrHoIA00o="
++    },
+     "core-js": {
+       "version": "1.2.7",
+       "resolved": "https://registry.npmjs.org/core-js/-/core-js-1.2.7.tgz",
+@@ -1108,6 +1123,11 @@
+       "resolved": "https://registry.npmjs.org/form-data/-/form-data-2.3.1.tgz",
+       "integrity": "sha1-b7lPvXGIUwbXPRXMSX/kzE7NRL8="
+     },
++    "formidable": {
++      "version": "1.1.1",
++      "resolved": "https://registry.npmjs.org/formidable/-/formidable-1.1.1.tgz",
++      "integrity": "sha1-lriIb3w8NQi5Mta9cMTTqI818ak="
++    },
+     "forwarded": {
+       "version": "0.1.2",
+       "resolved": "https://registry.npmjs.org/forwarded/-/forwarded-0.1.2.tgz",
+@@ -1778,6 +1798,11 @@
+       "resolved": "https://registry.npmjs.org/graceful-fs/-/graceful-fs-4.1.11.tgz",
+       "integrity": "sha1-Dovf5NHduIVNZOBOp8AOKgJuVlg="
+     },
++    "growl": {
++      "version": "1.10.3",
++      "resolved": "https://registry.npmjs.org/growl/-/growl-1.10.3.tgz",
++      "integrity": "sha512-hKlsbA5Vu3xsh1Cg3J7jSmX/WaW6A5oBeqzM88oNbCRQFz+zUaXm6yxS4RVytp1scBoJzSYl4YAEOQIt6O8V1Q=="
++    },
+     "growly": {
+       "version": "1.3.0",
+       "resolved": "https://registry.npmjs.org/growly/-/growly-1.3.0.tgz",
+@@ -1844,6 +1869,11 @@
+         }
+       }
+     },
++    "he": {
++      "version": "1.1.1",
++      "resolved": "https://registry.npmjs.org/he/-/he-1.1.1.tgz",
++      "integrity": "sha1-k0EP0hsAlzUVH4howvJx80J+I/0="
++    },
+     "hoek": {
+       "version": "4.2.0",
+       "resolved": "https://registry.npmjs.org/hoek/-/hoek-4.2.0.tgz",
+@@ -2754,6 +2784,33 @@
+         }
+       }
+     },
++    "mocha": {
++      "version": "4.0.1",
++      "resolved": "https://registry.npmjs.org/mocha/-/mocha-4.0.1.tgz",
++      "integrity": "sha512-evDmhkoA+cBNiQQQdSKZa2b9+W2mpLoj50367lhy+Klnx9OV8XlCIhigUnn1gaTFLQCa0kdNhEGDr0hCXOQFDw==",
++      "dependencies": {
++        "commander": {
++          "version": "2.11.0",
++          "resolved": "https://registry.npmjs.org/commander/-/commander-2.11.0.tgz",
++          "integrity": "sha512-b0553uYA5YAEGgyYIGYROzKQ7X5RAqedkfjiZxwi0kL1g3bOaBNNZfYkzt/CL0umgD5wc9Jec2FbB98CjkMRvQ=="
++        },
++        "debug": {
++          "version": "3.1.0",
++          "resolved": "https://registry.npmjs.org/debug/-/debug-3.1.0.tgz",
++          "integrity": "sha512-OX8XqP7/1a9cqkxYw2yXss15f26NKWBpDXQd0/uK/KPqdQhxbPa994hnzjcE2VqQpDslf55723cKPUOGSmMY3g=="
++        },
++        "diff": {
++          "version": "3.3.1",
++          "resolved": "https://registry.npmjs.org/diff/-/diff-3.3.1.tgz",
++          "integrity": "sha512-MKPHZDMB0o6yHyDryUOScqZibp914ksXwAMYMTHj6KO8UeKsRYNJD3oNCKjTqZon+V488P7N/HzXF8t7ZR95ww=="
++        },
++        "supports-color": {
++          "version": "4.4.0",
++          "resolved": "https://registry.npmjs.org/supports-color/-/supports-color-4.4.0.tgz",
++          "integrity": "sha512-rKC3+DyXWgK0ZLKwmRsrkyHVZAjNkfzeehuFWdGGcqGDTZFH73+RH6S/RDAAxl9GusSjZSUWYLmT9N5pzXFOXQ=="
++        }
++      }
++    },
+     "moment": {
+       "version": "2.19.3",
+       "resolved": "https://registry.npmjs.org/moment/-/moment-2.19.3.tgz",
+@@ -2802,6 +2859,11 @@
+       "resolved": "https://registry.npmjs.org/negotiator/-/negotiator-0.6.1.tgz",
+       "integrity": "sha1-KzJxhOiZIQEXeyhWP7XnECrNDKk="
+     },
++    "net": {
++      "version": "1.0.2",
++      "resolved": "https://registry.npmjs.org/net/-/net-1.0.2.tgz",
++      "integrity": "sha1-0XV+yaf7I3HYPPR1XOPifhCCk4g="
++    },
+     "node-fetch": {
+       "version": "1.7.3",
+       "resolved": "https://registry.npmjs.org/node-fetch/-/node-fetch-1.7.3.tgz",
+@@ -2812,6 +2874,11 @@
+       "resolved": "https://registry.npmjs.org/node-int64/-/node-int64-0.4.0.tgz",
+       "integrity": "sha1-h6kGXNs1XTGC2PlM4RGIuCXGijs="
+     },
++    "node-mocks-http": {
++      "version": "1.6.6",
++      "resolved": "https://registry.npmjs.org/node-mocks-http/-/node-mocks-http-1.6.6.tgz",
++      "integrity": "sha1-D97vhmzBIqgAUbvYmodtPEzSHhM="
++    },
+     "node-notifier": {
+       "version": "5.1.2",
+       "resolved": "https://registry.npmjs.org/node-notifier/-/node-notifier-5.1.2.tgz",
+@@ -3624,6 +3691,23 @@
+       "resolved": "https://registry.npmjs.org/stripe/-/stripe-5.4.0.tgz",
+       "integrity": "sha512-VCDFp4oQu1uOcOLHIwRIznH8ikLJcpDsHahWN48V/QuV6y2Bm281cq5wnkjqv+LPdUpqXVp9pjlb+SfN6dnyZg=="
+     },
++    "superagent": {
++      "version": "3.8.2",
++      "resolved": "https://registry.npmjs.org/superagent/-/superagent-3.8.2.tgz",
++      "integrity": "sha512-gVH4QfYHcY3P0f/BZzavLreHW3T1v7hG9B+hpMQotGQqurOvhv87GcMCd6LWySmBuf+BDR44TQd0aISjVHLeNQ==",
++      "dependencies": {
++        "debug": {
++          "version": "3.1.0",
++          "resolved": "https://registry.npmjs.org/debug/-/debug-3.1.0.tgz",
++          "integrity": "sha512-OX8XqP7/1a9cqkxYw2yXss15f26NKWBpDXQd0/uK/KPqdQhxbPa994hnzjcE2VqQpDslf55723cKPUOGSmMY3g=="
++        }
++      }
++    },
++    "supertest": {
++      "version": "3.0.0",
++      "resolved": "https://registry.npmjs.org/supertest/-/supertest-3.0.0.tgz",
++      "integrity": "sha1-jUu2j9GDDuBwM7HFpamkAhyWUpY="
++    },
+     "supports-color": {
+       "version": "4.5.0",
+       "resolved": "https://registry.npmjs.org/supports-color/-/supports-color-4.5.0.tgz",
+diff --git a/package.json b/package.json
+index b688b25..38921e3 100644
+--- a/package.json
++++ b/package.json
+@@ -4,9 +4,9 @@
+   "description": "send snail mail withoug leaving your chair",
+   "main": "index.js",
+   "scripts": {
+-    "test": "test",
++    "test": "jest",
+     "start": "node index.js",
+-    "start:dev": "nodemon",
++    "start:dev": "nodemon index.js",
+     "knex": "knex",
+     "reset-db": "npm run knex migrate:rollback && npm run knex migrate:latest && npm run knex seed:run"
+   },
+@@ -35,13 +35,16 @@
+     "lodash.isfunction": "^3.0.8",
+     "lodash.omit": "^4.5.0",
+     "lodash.pick": "^4.4.0",
++    "mocha": "^4.0.1",
+     "morgan": "^1.9.0",
+     "multer": "^1.3.0",
++    "node-mocks-http": "^1.6.6",
+     "pg": "^7.4.0",
+     "pluralize": "^7.0.0",
+     "promisify": "0.0.3",
+     "react-s3-uploader": "^4.5.1",
+     "stripe": "^5.3.0",
++    "supertest": "^3.0.0",
+     "yup": "^0.23.0"
+   },
+   "devDependencies": {
+diff --git a/routes/payment.js b/routes/payment.js
+index 55c465d..134d8a2 100644
+--- a/routes/payment.js
++++ b/routes/payment.js
+@@ -128,11 +128,14 @@ const paymentApi = app => {
+         //req.body.mailInfo.receiverInfo should not have the message
+         Lob.postcards.create(
+           {
+-            description: 'Deployed',
++            description: 'Hello',
+             to: req.body.mailInfo.receiverInfo,
+             from: req.body.mailInfo.senderInfo,
+-            front: `https://mailapp-backend-187406.appspot.com${req.body
+-              .mailInfo.S3UploadPublicPath}`,
++            front: `http://platypost110017-env.us-west-1.elasticbeanstalk.com${req
++              .body.mailInfo.S3UploadPublicPath}`,
++            // front: `https://mailapp-backend-187406.appspot.com${req.body
++            //   .mailInfo.S3UploadPublicPath}`,
++
+             back: 'tmpl_ebddb82469e58ce',
+             merge_variables: {
+               // name: 'mia',
+diff --git a/server.js b/server.js
+deleted file mode 100644
+index 982ecf2..0000000
+--- a/server.js
++++ /dev/null
+@@ -1,24 +0,0 @@
+-// const cors = require('cors');
+-// const bodyParser = require('body-parser');
+-//
+-// const CORS_WHITELIST = require('./constants/frontend');
+-//
+-// const corsOptions = {
+-//   origin: (origin, callback) =>
+-//     CORS_WHITELIST.indexOf(origin) !== -1
+-//       ? callback(null, true)
+-//       : callback(new Error('Not allowed by CORS'))
+-// };
+-//
+-// const configureServer = app => {
+-//   console.log('****');
+-//   app.use(
+-//     cors({
+-//       origin: 'http://localhost:3000',
+-//       credentials: true
+-//     })
+-//   );
+-//   app.use(bodyParser.json());
+-// };
+-//
+-// module.exports = configureServer;
+diff --git a/test.js b/testingLob.js
+similarity index 84%
+rename from test.js
+rename to testingLob.js
+index 9ff7af0..a1df2e5 100644
+--- a/test.js
++++ b/testingLob.js
+@@ -53,8 +53,10 @@ Lob.postcards.create(
+       address_state: 'CA',
+       address_zip: '94107'
+     },
++    //check
+     front:
+-      'https://mailapp-backend-187406.appspot.com/s3/uploads/dd64c052-97f1-441c-93ce-57ba547ead81_/uploads/IdaliaRamosFullStackEngineer.pdf',
++      'http://platypost110017-env.us-west-1.elasticbeanstalk.com/s3/uploads/dd64c052-97f1-441c-93ce-57ba547ead81_/uploads/IdaliaRamosFullStackEngineer.pdf',
++    // 'https://mailapp-backend-187406.appspot.com/s3/uploads/dd64c052-97f1-441c-93ce-57ba547ead81_/uploads/IdaliaRamosFullStackEngineer.pdf',
+     back: 'https://lob.com/postcardback.pdf'
+   },
+   function(err, res) {
