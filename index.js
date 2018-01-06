@@ -27,8 +27,8 @@ const morgan = require('morgan');
 app.use(morgan('dev'));
 app.use(
   cors({
-    // origin: 'http://platypost.s3-website-us-west-1.amazonaws.com',
-    origin: 'http://localhost:3000',
+    origin: 'http://platypost.s3-website-us-west-1.amazonaws.com',
+    // origin: 'http://localhost:3000',
     credentials: true
   })
 );
