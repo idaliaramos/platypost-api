@@ -58,8 +58,10 @@ typings/
 
 # dotenv environment variables file
 .env
-
+.env.development
 .env.test
+.env.eb.backup
+.env.eb
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
