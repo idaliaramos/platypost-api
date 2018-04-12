@@ -13,10 +13,11 @@ const paymentApi = app => {
       timestamp: new Date().toISOString()
     });
   });
-
+  //this is providing other endpoints that provide temporary public access of the upload
   app.get('/s3/*');
-
+  //call from front end hits here to send to lob and charge stripe
   app.post('/', (req, res) => {
+    //stripe.charges.create charges the token to stripe and returns an error if there is one, ending the process.
     stripe.charges.create(
       req.body.paymentInfo,
       (stripeError, stripeSuccess) => {
@@ -24,7 +25,7 @@ const paymentApi = app => {
           res.status(500).send({ stripeError });
           return;
         }
-        //req.body.mailInfo.receiverInfo should not have the message
+        //if the stripe charge succeeds it will proceed to create a postcard to LOB
         Lob.postcards.create(
           {
             description: 'Hello',
@@ -43,6 +44,7 @@ const paymentApi = app => {
               res.status(500).send({ stripeSuccess, lobError });
               return;
             }
+            //the address service will create a new record for that user Id
             const service = new AddressService();
             const newAddress = service
               .createForUser(

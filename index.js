@@ -3,7 +3,6 @@ const multer = require('multer');
 const AWS = require('aws-sdk');
 const { JWT_KEY } = require('./env');
 const usersRouter = require('./lib/instances/usersRouter');
-// const historyRouter = require('./lib/instances/historyRouter');
 const mailRouter = require('./lib/instances/mailRouter');
 const authenticationRouter = require('./lib/instances/authenticationRouter');
 const SERVER_CONFIGS = require('./constants/server');
@@ -27,8 +26,9 @@ const morgan = require('morgan');
 app.use(morgan('dev'));
 app.use(
   cors({
-    origin: 'http://platypost.s3-website-us-west-1.amazonaws.com',
+    origin: 'http://localhost:3000',
     // origin: 'http://localhost:3000',
+    //http://platypost.s3-website-us-west-1.amazonaws.com
     credentials: true
   })
 );
